@@ -241,7 +241,8 @@ const SUCK_STAGGER = 0.12;
 const SUCK_DUR = 1.1;
 const T_SIGH = 2.55;        // «Фух…»
 const T_RISE = 2.9;         // начало подъёма тучи (старт 15-секундного таймера)
-const STORM_DUR = 15;       // ровно 15 с от начала подъёма до надписи
+const CLOUD_DUR = 12;       // туча уходит за экран (~11 с от начала подъёма)
+const STORM_DUR = 13;       // ровно 13 с от начала подъёма до надписи
 const MSG_DELAY = 3;        // через 3 с после надписи — «Ещё раз»
 const INK = '#2b0b0e';
 
@@ -1316,14 +1317,14 @@ function updateCloud(dt, pt) {
   if (state.ev.rise) {
     const rt = state.purgeTimer;
     cl.morph = smooth(0, 2.2, rt);
-    // ускоряется к концу: полностью за экраном к ~14–14.8 с
-    const u = Math.pow(clamp(rt / (STORM_DUR - 0.2), 0, 1), 1.15);
+    // ускоряется к концу: полностью за экраном к ~11 с
+    const u = Math.pow(clamp(rt / CLOUD_DUR, 0, 1), 1.15);
     const p = cloudPathPoint(u);
     cl.x = p.x + Math.sin(rt * 1.3) * 6 * S * (1 - u);
     cl.y = p.y;
     cl.alpha = 1;
     // дождик из тучи
-    if (rt > 0.6 && rt < 10 && Math.random() < 0.7) {
+    if (rt > 0.6 && rt < 8 && Math.random() < 0.7) {
       const w = cl.stormW;
       const p2 = spawn('thunder', cl.x + rand(-0.32, 0.32) * w, cl.y + w * 0.18);
       p2.rain = true; p2.vx = -40 * S; p2.vy = rand(420, 560) * S; p2.max = rand(0.4, 0.9);
@@ -1789,7 +1790,7 @@ function updateScreenFx(dt) {
   if (ph === 'purge' || ph === 'done') {
     const rt = state.purgeTimer;
     if (pt < T_FREEZE) fire = 0.6;
-    dark = 0.18 + 0.72 * smooth(T_FREEZE, T_FREEZE + 1, pt) * (1 - smooth(9, 14.5, state.ev.rise ? rt : 0));
+    dark = 0.18 + 0.72 * smooth(T_FREEZE, T_FREEZE + 1, pt) * (1 - smooth(7, 11.5, state.ev.rise ? rt : 0));
   }
   const v = [dark, warm, fire];
   const els = [vigDark, vigWarm, vigFire];
@@ -1799,7 +1800,7 @@ function updateScreenFx(dt) {
   // небо темнеет под тучей
   if (ph === 'purge' || ph === 'done') {
     const rt = state.ev.rise ? state.purgeTimer : 0;
-    state.dim = 0.32 * smooth(T_FREEZE, T_FREEZE + 1.2, pt) * (1 - smooth(8, 14, rt));
+    state.dim = 0.32 * smooth(T_FREEZE, T_FREEZE + 1.2, pt) * (1 - smooth(6.5, 11, rt));
   } else state.dim = 0;
 }
 
