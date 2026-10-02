@@ -241,8 +241,8 @@ const SUCK_STAGGER = 0.12;
 const SUCK_DUR = 1.1;
 const T_SIGH = 2.55;        // «Фух…»
 const T_RISE = 2.9;         // начало подъёма тучи (старт 15-секундного таймера)
-const CLOUD_DUR = 12;       // туча уходит за экран (~11 с от начала подъёма)
-const STORM_DUR = 13;       // ровно 13 с от начала подъёма до надписи
+const CLOUD_DUR = 10;       // туча уходит за экран (~9 с от начала подъёма)
+const MSG_AFTER_CLOUD = 0.3; // надпись — сразу после того, как туча скрылась
 const MSG_DELAY = 3;        // через 3 с после надписи — «Ещё раз»
 const INK = '#2b0b0e';
 
@@ -1184,13 +1184,16 @@ function updatePurge(dt) {
     cl.riseFrom = { x: cl.x, y: cl.y };
     // 2–4 молнии за время подъёма
     const n = 2 + ((Math.random() * 3) | 0);
-    const slots = [0.7, 2.6, 4.8, 7.2];
+    const slots = [0.6, 2.0, 3.6, 5.3];
     for (let i = 0; i < n; i++) ev.strikes.push({ t: slots[i] + rand(-0.25, 0.35), done: false, big: i === 0 });
   }
   if (ev.rise) {
     state.purgeTimer = pt - T_RISE;
     for (const s of ev.strikes) if (!s.done && state.purgeTimer >= s.t) { s.done = true; strike(s.big); }
-    if (!ev.final && state.purgeTimer >= STORM_DUR) {
+    const cl = state.cloud;
+    if (!ev.offAt && cl && cl.x - cl.stormW * 0.5 > W) ev.offAt = state.purgeTimer;
+    const msgAt = Math.min(ev.offAt ? ev.offAt + MSG_AFTER_CLOUD : Infinity, CLOUD_DUR + MSG_AFTER_CLOUD);
+    if (!ev.final && state.purgeTimer >= msgAt) {
       ev.final = true;
       state.message = { shownAt: state.time };
       elFinal.classList.add('show');
@@ -1324,7 +1327,7 @@ function updateCloud(dt, pt) {
     cl.y = p.y;
     cl.alpha = 1;
     // дождик из тучи
-    if (rt > 0.6 && rt < 8 && Math.random() < 0.7) {
+    if (rt > 0.6 && rt < 6.5 && Math.random() < 0.7) {
       const w = cl.stormW;
       const p2 = spawn('thunder', cl.x + rand(-0.32, 0.32) * w, cl.y + w * 0.18);
       p2.rain = true; p2.vx = -40 * S; p2.vy = rand(420, 560) * S; p2.max = rand(0.4, 0.9);
@@ -1790,7 +1793,7 @@ function updateScreenFx(dt) {
   if (ph === 'purge' || ph === 'done') {
     const rt = state.purgeTimer;
     if (pt < T_FREEZE) fire = 0.6;
-    dark = 0.18 + 0.72 * smooth(T_FREEZE, T_FREEZE + 1, pt) * (1 - smooth(7, 11.5, state.ev.rise ? rt : 0));
+    dark = 0.18 + 0.72 * smooth(T_FREEZE, T_FREEZE + 1, pt) * (1 - smooth(5.5, 9.3, state.ev.rise ? rt : 0));
   }
   const v = [dark, warm, fire];
   const els = [vigDark, vigWarm, vigFire];
@@ -1800,7 +1803,7 @@ function updateScreenFx(dt) {
   // небо темнеет под тучей
   if (ph === 'purge' || ph === 'done') {
     const rt = state.ev.rise ? state.purgeTimer : 0;
-    state.dim = 0.32 * smooth(T_FREEZE, T_FREEZE + 1.2, pt) * (1 - smooth(6.5, 11, rt));
+    state.dim = 0.32 * smooth(T_FREEZE, T_FREEZE + 1.2, pt) * (1 - smooth(5, 9, rt));
   } else state.dim = 0;
 }
 
