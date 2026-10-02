@@ -90,7 +90,8 @@
   .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
   .btn:disabled { filter: grayscale(0.8) brightness(0.95); cursor: default; }
   .btn.light { background: #fff; color: var(--ink); text-shadow: none; }
-  #counter { margin-top: 10px; font-weight: 800; font-size: 15px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  #hint { margin: 6px 0 0 4px; font-size: 13px; font-weight: 600; opacity: 0.7; }
+  #counter { margin-top: 8px; font-weight: 800; font-size: 15px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
   #counter b { font-variant-numeric: tabular-nums; }
   #bar {
     margin-top: 6px; height: 14px; border-radius: 8px;
@@ -168,9 +169,10 @@
     <div id="title">🔥 Жопное облако — антистресс</div>
     <div id="row">
       <input id="name" type="text" maxlength="40" autocomplete="off" spellcheck="false"
-             enterkeyhint="send" placeholder="Введите ФИО того, от кого подгорает">
+             enterkeyhint="send" placeholder="Введите ФИО*">
       <button id="fire" class="btn">Запустить</button>
     </div>
+    <div id="hint">* того, от кого подгорает</div>
     <div id="counter">
       <span>Имён в жопе: <b id="count">0</b> / 6</span>
       <button id="enough" class="btn" hidden>Хватит! 💨</button>
@@ -976,7 +978,7 @@ function updateHud() {
   elFill.classList.toggle('hot', state.phase === 'burning' || state.phase === 'purge');
   const locked = state.phase === 'purge' || state.phase === 'done';
   elName.disabled = locked; elFire.disabled = locked;
-  elName.placeholder = locked ? 'Жопа очищается…' : 'Введите ФИО того, от кого подгорает';
+  elName.placeholder = locked ? 'Жопа очищается…' : 'Введите ФИО*';
   elEnough.hidden = !(n >= 1 && (state.phase === 'smolder' || state.phase === 'burning'));
 }
 function shakeInput() {
